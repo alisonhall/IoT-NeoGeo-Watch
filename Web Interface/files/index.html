@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Arduino and Nodejs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Slabo+27px" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ultra" rel="stylesheet">
+    <link rel="stylesheet" href="/css/stylesheet.css">
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>NavGeo</h1>
+        <div class="mode">
+          <p>Mode:</p>
+          <h2 id="modeVal"></h2>
+        </div>
+        <div class="columns">
+            <p>NeoPixel Ring Power</p>
+            <div class="onoffswitch">
+                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="myonoffswitch">
+                <label class="onoffswitch-label" for="myonoffswitch"></label>
+            </div>
+            <p>Single NeoPixel Power</p>
+            <div class="onoffswitch">
+                <input type="checkbox" name="onoffswitchtwo" class="onoffswitch-checkbox-red" id="myonoffswitchtwo">
+                <label class="onoffswitch-label" for="myonoffswitchtwo"></label>
+            </div>
+        </div>
+        <div class="mode">
+            <button type="button" name="modeButton0">Clock/Time Mode</button>
+            <button type="button" name="modeButton1">Nav/GPS Mode</button>
+            <button type="button" name="modeButton2">Compass Mode</button>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        var toggleVal1 = 0;
+        var toggleVal2 = 0;
+        var mode = 0;
+        var socket = io();
+        socket.on('readMode', function (receivedData) {
+            console.log(receivedData);
+            if (receivedData == 0) {
+                $("#modeVal").textContent = "Clock/Time";
+                mode = 0;
+            } else if (receivedData == 1) {
+                $("#modeVal").textContent = "Nav/GPS";
+                mode = 1;
+            } else {
+                $("#modeVal").textContent = "Compass";
+                mode = 2;
+            }
+        });
+        $('#myonoffswitch').click(function () {
+          toggleVal1 += 1;
+          toggleVal1 %= 2;
+          // the code above checks to see if the number is 1 or 2 and divides by 2 and checks the remainder and will be a 1 or 0
+          socket.emit('powerSwitch1', toggleVal1); // this will send a the value to a function on the server that is listening.
+          console.log(toggleVal1);
+        });
+        $('#myonoffswitchtwo').click(function () {
+            toggleVal2 += 1;
+            toggleVal2 %= 2;
+            // the code above checks to see if the number is 1 or 2 and divides by 2 and checks the remainder and will be a 1 or 0
+            socket.emit('powerSwitch2', toggleVal2); // this will send a the value to a function on the server that is listening.
+            console.log(toggleVal2);
+        });
+        $('#modeButton0').click(function () {
+            mode = 0;
+            socket.emit('modeChange', mode);
+            console.log("modeChange", mode);
+        });
+        $('#modeButton1').click(function () {
+            mode = 1;
+            socket.emit('modeChange', mode);
+            console.log("modeChange", mode);
+        });
+        $('#modeButton2').click(function () {
+            mode = 2;
+            socket.emit('modeChange', mode);
+            console.log("modeChange", mode);
+        });
+    </script>
+</body>
+
+</html>
